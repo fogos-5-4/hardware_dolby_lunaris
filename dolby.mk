@@ -21,113 +21,75 @@ DOLBY_PATH := hardware/dolby
 PRODUCT_SOONG_NAMESPACES += \
    $(DOLBY_PATH)
 
-# Enable codec support
-AUDIO_FEATURE_ENABLED_DS2_DOLBY_DAP := true
-
 # SEPolicy
 BOARD_VENDOR_SEPOLICY_DIRS += $(DOLBY_PATH)/sepolicy/vendor
 
 # HIDL
-DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += $(DOLBY_PATH)/dolby_framework_matrix.xml
-DEVICE_MANIFEST_FILE += $(DOLBY_PATH)/vendor.dolby.hardware.dms@2.0-service.xml
-DEVICE_MANIFEST_FILE += $(DOLBY_PATH)/vendor.dolby.media.c2.xml
-    
-# Configs
-PRODUCT_COPY_FILES += \
-    $(DOLBY_PATH)/configs/dax-default.xml:$(TARGET_COPY_OUT_VENDOR)/etc/dolby/dax-default.xml \
-    $(DOLBY_PATH)/configs/media_codecs_dolby_audio.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_dolby_audio.xml
+DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += $(DOLBY_PATH)/configs/vintf/dolby_framework_matrix.xml
+DEVICE_MANIFEST_FILE += \
+    $(DOLBY_PATH)/configs/vintf/vendor.dolby.hardware.dms@2.0-service.xml \
+    $(DOLBY_PATH)/configs/vintf/vendor.dolby.media.c2@1.0-service.xml
 
-# Dolby VNDK libs
+# Build codec2 packages
 PRODUCT_PACKAGES += \
-    libstagefright_foundation-v33
-
-PRODUCT_PACKAGES += \
-    libshim_dolby
-
-# Init
-PRODUCT_PACKAGES += \
-    init.dolby.rc
-
-# Overlays    
-PRODUCT_PACKAGES += \
-    DolbyFrameworksResCommon
-
-# Permissions
-PRODUCT_COPY_FILES += \
-    $(DOLBY_PATH)/configs/permissions/privapp-permissions-dolby.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-dolby.xml
-
-# Spatial Audio
-PRODUCT_COPY_FILES += \
-    $(DOLBY_PATH)/configs/android.hardware.sensor.dynamic.head_tracker.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.dynamic.head_tracker.xml \
-
-# Spatial Audio: optimize spatializer effect
-PRODUCT_PROPERTY_OVERRIDES += \
-       audio.spatializer.effect.util_clamp_min=300
-
-# Spatial Audio: declare use of spatial audio
-PRODUCT_PROPERTY_OVERRIDES += \
-       ro.audio.spatializer_enabled=true \
-       ro.audio.headtracking_enabled=true \
-       ro.audio.spatializer_transaural_enabled_default=false \
-       persist.vendor.audio.spatializer.speaker_enabled=true \
-
-# Spatial Audio Proprietary blobs
-PRODUCT_PACKAGES += \
-    libspatialaudio
-
-# Media (C2)
-PRODUCT_PACKAGES += \
-    android.hardware.media.c2@1.0.vendor \
-    android.hardware.media.c2@1.1.vendor \
-    android.hardware.media.c2@1.2.vendor \
+    libavservices_minijail.vendor \
     libcodec2_hidl@1.2.vendor \
-    libsfplugin_ccodec_utils.vendor \
+    libstagefright_foundation-v33 \
     libcodec2_soft_common.vendor
 
-# Codec2 Props
-PRODUCT_VENDOR_PROPERTIES += \
-    vendor.audio.c2.preferred=true \
-    debug.c2.use_dmabufheaps=1 \
-    vendor.qc2audio.suspend.enabled=true \
-    vendor.qc2audio.per_frame.flac.dec.enabled=true
+# Configs
+PRODUCT_COPY_FILES += \
+    $(DOLBY_PATH)/configs/dax/dax-default.xml:$(TARGET_COPY_OUT_VENDOR)/etc/dolby/dax-default.xml \
+    $(DOLBY_PATH)/configs/media/media_codecs_dolby_audio.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_dolby_audio.xml
 
-# Dolby Props
+# Dolby
 PRODUCT_VENDOR_PROPERTIES += \
     ro.vendor.dolby.dax.version=DAX3_3.7.0.8_r1 \
-    vendor.audio.dolby.ds2.hardbypass=false \
-    vendor.audio.dolby.ds2.enabled=false
-
-# Remove Packages for Dolby Support
-PRODUCT_PACKAGES += \
-    RemovePackagesDolby
+    ro.audio.spatializer_enabled=true \
+    ro.vendor.audio.dolby.dax.support=true \
+    ro.vendor.audio.dolby.surround.enable=true \
+    ro.audio.spatializer_transaural_enabled_default=false \
+    vendor.audio.dolby.ds2.enabled=false \
+    vendor.audio.dolby.ds2.hardbypass=false
 
 # LunarisDolby
 PRODUCT_PACKAGES += \
     LunarisDolby
 
-# Dolby Proprietary blobs
+# Init
+PRODUCT_PACKAGES += \
+    init.dolby.rc
+
+# Proprietary-files
 PRODUCT_COPY_FILES += \
     $(DOLBY_PATH)/proprietary/vendor/etc/init/vendor.dolby.hardware.dms@2.0-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.dolby.hardware.dms@2.0-service.rc \
-
-# Codec2 (Dolby)
-PRODUCT_COPY_FILES += \
-    $(DOLBY_PATH)/proprietary/vendor/etc/init/vendor.dolby.media.c2@1.0-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.dolby.media.c2@1.0-service.rc \
+    $(DOLBY_PATH)/proprietary/vendor/etc/init/vendor.dolby.media.c2@1.0-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.dolby.media.c2@1.0-service.rc
 
 PRODUCT_PACKAGES += \
-    libdapparamstorage \
-    libdlbpreg \
-    vendor.dolby.hardware.dms@2.0 \
-    libdlbdsservice \
-    liboem_specific \
     vendor.dolby.hardware.dms@2.0-impl \
+    vendor.dolby.hardware.dms@2.0 \
     vendor.dolby.hardware.dms@2.0-service \
+    vendor.dolby.media.c2@1.0-service \
     libcodec2_soft_ac4dec \
     libcodec2_soft_ddpdec \
     libcodec2_soft_dolby \
     libcodec2_store_dolby \
+    libdapparamstorage \
     libdeccfg \
-    vendor.dolby.media.c2@1.0-service \
+    libdlbdsservice \
+    libdlbpreg \
+    libspatializerparamstorage \
+    liboem_specific \
+    libswspatializer_ext \
     libdlbvol \
-    libswdap \
     libswgamedap \
-    libswvqe \
+    libswspatializer \
+    libswvqe
+
+ifeq ($(USE_HWDAP),true)
+PRODUCT_PACKAGES += \
+    libhwdap
+else
+PRODUCT_PACKAGES += \
+    libswdap
+endif
