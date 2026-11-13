@@ -1,82 +1,61 @@
-# Dolby Atmos
+Sony Dolby
+==============
 
-Dolby audio effects and Codec2 decoders.
+Getting Started
+---------------
+For dolby media codecs to work add this line in your media codecs config (should be in vendor partition) :-
 
-## Getting Started
-
-### 1. Media Codecs
-
-To enable Dolby AC-3, E-AC-3, E-AC-3 JOC, and AC-4 decoding, make sure your device supports Codec2 and add the following line to your vendor media codecs configuration:
-
-```xml
+```bash
 <Include href="media_codecs_dolby_audio.xml" />
 ```
 
-### 2. Audio Effects
+To build, add the dolby effects in your device's audio effects config then inherit the dolby config by adding this in your device's makefile :-
 
-Both software and hardware Dolby Audio Processing (DAP) implementations are supported:
-
-- `libswdap.so` — Software DAP (default).
-- `libhwdap.so` — Hardware DAP.
-
-Check which DAP implementation is used by inspecting `audio_effects.xml` in your stock ROM dump.
-
-Register the appropriate Dolby effects in your device's `audio_effects.xml`.
-
-### 3. Build Configuration
-
-Include the Dolby configuration in your device's product makefile.
-
-**For builds with Software DAP (default):**
-
-```makefile
+```bash
 $(call inherit-product, hardware/dolby/dolby.mk)
 ```
 
-**For builds with Hardware DAP:**
+Now, moving hidl definitions in manifest to device trees is completely absurd so stop overriding manifest in your device trees an example for such would be :-
 
-```makefile
-USE_HWDAP := true
-$(call inherit-product, hardware/dolby/dolby.mk)
-```
+Changing these in BoardConfig makefile of your device tree:-
 
-### 4. VINTF Configuration
-
-Avoid overriding existing device manifest and framework compatibility matrix definitions.
-
-In your device's `BoardConfig.mk`, use `+=` instead of `:=` when appending manifest or compatibility matrix files.
-
-**Incorrect:**
-
-```makefile
+```bash
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE :=
+```
+And
+
+```bash
 DEVICE_MANIFEST_FILE :=
 ```
 
-**Correct:**
+To:-
 
-```makefile
-DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE += \
-    path/to/compatibility_matrix.xml
+```bash
+DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE +=
+```
+And
 
-DEVICE_MANIFEST_FILE += \
-    path/to/manifest.xml
+```bash
+DEVICE_MANIFEST_FILE +=
 ```
 
-This preserves previously defined entries and helps prevent the device tree from unintentionally replacing existing VINTF declarations.
+The only change done above is changing := symbol to += so that manifest can't be overriden from device tree in BoardConfig makefile.
 
-### 5. SELinux Configuration
+At the end an example commit to properly implement it in your device tree could be :-
 
-For MediaTek (MTK) devices, add the following rule to your device's `hal_dms_default.te`:
+[**1**] https://github.com/Spanish-or-Vanish/android_device_xiaomi_sm8350-common/commit/8ece9a976087ed03f1adb447d0ac2a3f5f1a0d3c
 
-```te
-get_prop(hal_dms_default, vendor_mtk_audio_prop)
-```
+[**2**] https://github.com/Spanish-or-Vanish/android_device_xiaomi_sm8350-common/commit/f5abe4a589d54d8363b0f3458e09e3c069cf6384
+ 
+#### Tip pick anyone for Reference:
+          https://dumps.tadiphone.dev/dumps/xiaomi/vili/-/blob/missi_phone_global-user-14-UKQ1.231207.002-V816.0.5.0.UKDMIXM-release-keys/aosp-device-tree/proprietary-files.txt#L2072
+          https://github.com/Spanish-or-Vanish/android_device_xiaomi_sm8350-common/commit/6a8f6aae347f9f864f17f2dfa5d541f83ab5b170
+          https://github.com/Spanish-or-Vanish/android_device_xiaomi_sm8350-common/commit/5c593cbd2c19d571b7e62ea4bd6b8c864a4e1d9e
 
-This allows the Dolby DMS HAL to read MediaTek vendor audio properties.
-
-## Testing
-
-Use the official Dolby test samples to verify audio playback and codec support:
-
-[Dolby Mobile Tests](https://ott.dolby.com/Mobile_tests/index.html)
+# Credits:
+ * [**HELLBOY017**](https://github.com/HELLBOY017)
+ * [**adithya2306**](https://github.com/adithya2306)
+ * [**johnmart19**](https://github.com/johnmart19)
+ * [**userariii**](https://github.com/userariii)
+ * [**saku-bruh**](https://github.com/saku-bruh)
+ * [**ahnet-69 · he/him**](https://github.com/ahnet-69)
